@@ -20,7 +20,7 @@ var Category = require('./models/category');
 
 var app = express();
 
-mongoose.connect('localhost:27017/shoppingplatform'');
+mongoose.connect('localhost:27017/shoppingplatform');
 
 require('./config/passport');
 
