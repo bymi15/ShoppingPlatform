@@ -1,0 +1,27 @@
+<div class="row">
+    <div class="col-md-12">
+        <h1>Your order has been submitted!</h1>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-sm-6 col-md-6">
+        <h3>Shipping to</h3>
+        <p>{{shipping.address1}}</p>
+        <p>{{shipping.address2}}</p>
+        <p>{{shipping.city}}</p>
+        <p>{{shipping.postalCode}}</p>
+    </div>
+    <div class="col-sm-6 col-md-6">
+        <h3>Products</h3>
+        {{# each products }}
+            <a href="/product/{{this.item._id}}">{{this.item.title}}</a> (x {{this.quantity}})<br>
+        {{/each}}
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-md-12">
+        <p><strong>Order Total: ${{total}}</strong></p>
+    </div>
+</div>

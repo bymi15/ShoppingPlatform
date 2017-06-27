@@ -1,0 +1,73 @@
+<div class="shop-container">
+    <div class="row">
+        <div class="col-md-12 text-center" style="margin-top:20px;">
+            {{# if categoryName}}
+                <h1 style="font-size: 60px;">{{categoryName}}</h1>
+            {{else}}
+                <h1 style="font-size: 60px;">All Categories</h1>
+            {{/if}}
+        </div>
+
+        {{# if products }}
+        <div class="col-md-12" style="text-align: right; margin-bottom: 5px;">
+            <label style="font-weight:400;">Page {{currentPage}} - {{pages.length}} of {{numProducts}} products</label>
+        </div>
+        {{/if}}
+
+        <div class="col-md-2">
+            <ul class="nav nav-pills nav-stacked">
+                <li id="cat_all" role="presentation" class="categoryListing"><a href="/shop">All Categories</a></li>
+                {{# each categories}}
+                <li id="cat_{{this._id}}" class="categoryListing" role="presentation"><a href="/category/{{this._id}}">{{this.categoryName}}</a></li>
+                {{/each}}
+            </ul>
+        </div>
+
+        <input type="hidden" id="catId" value="{{categoryId}}">
+
+        <div class="col-md-10">
+            {{# if products }}
+                <div class="row">
+                    {{# each products }}
+                        <div class="col-sm-6 col-md-3">
+                            <div class="thumbnail">
+                                <a href="/product/{{this._id}}">
+                                    <img src="{{ this.imagePath }}" class="img-responsive">
+                                </a>
+                                <div class="caption">
+                                    <div class="heading">
+                                        <a href="/product/{{this._id}}" style="text-decoration: none;"><h4 class="name">{{ this.title }}</h4></a>
+                                        <p class="seller">Sold by {{ this.seller.fullName }}</p>
+                                        <p class="price">${{ this.price }}</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <a href="/addToCart/{{this._id}}" class="btn btn-success" role="button"><i class="fa fa-shopping-cart" aria-hidden="true"></i> Add to Cart</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {{/each}}
+                    <div class="col-sm-12">
+                        <nav aria-label="Page Navigation">
+                          <ul class="pagination">
+                            {{# if categoryId}}
+                                {{# each pages }}
+                                <li {{#if this.current}}class="active"{{/if}}><a href="/category/{{../categoryId}}/{{this.num}}">{{this.num}}</a></li>
+                                {{/each}}
+                            {{else}}
+                                {{# each pages }}
+                                <li {{#if this.current}}class="active"{{/if}}><a href="/shop/{{this.num}}">{{this.num}}</a></li>
+                                {{/each}}
+                            {{/if}}
+                          </ul>
+                        </nav>
+                    </div>
+                </div>
+            {{else}}
+                <h3>No products to display</h3>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/categoryListing.js"></script>

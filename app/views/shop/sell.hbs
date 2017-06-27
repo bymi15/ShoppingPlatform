@@ -1,0 +1,63 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h1>Sell Product</h1>
+            <form action="/sell" method="post" enctype="multipart/form-data">
+                <div class="col-md-12 form-group">
+                    <label for="title">Product Name</label>
+                    <input type="text" id="title" name="title" class="form-control" required>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="price">Category</label>
+                    <select id="category" name="category" class="form-control">
+                        {{# each categories}}
+                            <option value="{{this._id}}">{{this.categoryName}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="col-md-12 form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" class="form-control"></textarea>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="price">Price ($)</label>
+                    <input type="number" id="price" name="price" class="form-control" required>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="stock">Stock</label>
+                    <input type="number" id="stock" name="stock" class="form-control" required>
+                </div>
+                <div class="col-md-12 form-group">
+                    <label for="imagePath">Image Thumbnail</label>
+                    <div class="input-group">
+                        <input type="text" id="imageName" name="imageName" class="form-control" readonly>
+                        <input type="file" id="imageUpload" name="imageUpload" class="inputFile" accept="image/*" required>
+                        <span class="input-group-btn">
+                            <label class="btn btn-primary" for="imageUpload">Select an Image</label>
+                        </span>
+                    </div>
+                </div>
+                <!-- <div id="attributesArea" class="form-group">
+                    <label class="col-md-12">Attributes</label>
+                    <div class="col-md-4">
+                        <label for="attributeName" style="font-weight:300;">Name</label>
+                        <input type="text" id="attributeName" name="attributeName" class="form-control" placeholder="e.g. color, size, etc.">
+                    </div>
+                    <div class="col-md-8">
+                        <label for="attributeValue" style="font-weight:300;">Value(s)</label>
+                        <input type="text" id="attributeValues" name="attributeValues" class="form-control" placeholder="Enter some text or values seperated by commas (,)">
+                    </div>
+                </div>
+                <div class="col-md-12 form-group">
+                    <button type="button">Add more...</button>
+                </div> -->
+                <input type="hidden" id="sellerName" name="sellerName" value="{{session.user.fullName}}" class="form-control">
+                <div class="col-md-12 form-group">
+                    <button type="submit" class="btn btn-success">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/imageUpload.js"></script>

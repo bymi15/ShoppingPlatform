@@ -1,0 +1,30 @@
+<div class="container">
+    <div class="row">
+        <h1>My Orders</h1>
+        <hr>
+        {{# if orders }}
+            {{# each orders }}
+                <h4>Order from {{this.createdAt}}</h4>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <ul class="list-group">
+                            {{# each this.items }}
+                                <li class="list-group-item">
+                                    <span class="badge">${{ this.price }}</span>
+                                    <span class="label label-primary">{{ this.quantity }}</span> {{ this.item.title }}
+                                </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    <div class="panel-footer">
+                        Total: <strong>${{ this.cart.totalPrice }}</strong>
+                    </div>
+                </div>
+                <hr>
+            {{/each}}
+        {{else}}
+            <p>You have no orders</p>
+            <a href="/" class="btn btn-success" role="button">Continue shopping</a>
+        {{/if}}
+    </div>
+</div>

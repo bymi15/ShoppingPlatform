@@ -1,0 +1,33 @@
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6 col-md-4">
+            <div class="thumbnail">
+                <img src="{{ product.imagePath }}" class="img-responsive">
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-8">
+            {{# if hasLowStock }}
+                <span class="stockIndicator label label-warning">Low Stock</span>
+            {{/if}}
+            {{# if outOfStock }}
+                <span class="stockIndicator label label-danger">Out of stock</span>
+            {{/if}}
+            {{# if inStock }}
+                <span class="stockIndicator label label-success">In stock</span>
+            {{/if}}
+
+            <div class="caption">
+                <div class="heading">
+                    <h3 class="name">{{ product.title }}</h3>
+                    <p class="category">{{ product.category.categoryName }}</p>
+                    <p class="seller">Sold by {{ product.seller.fullName }}</p>
+                    <p class="price">${{ product.price }}</p>
+                    <p class="views"><i class="fa fa-eye" aria-hidden="true"></i> {{product.views}}</p>
+                </div>
+                <p class="description">{{ product.description }}</p>
+                <br>
+                <a href="/addToCart/{{product._id}}" class="btn btn-success" role="button"><i class="fa fa-shopping-cart"></i> Add to Cart</a>
+            </div>
+        </div>
+    </div>
+</div>

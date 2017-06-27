@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'>
+    <link rel="stylesheet" href="slider-pro/css/slider-pro.min.css"/>
+    <link rel='stylesheet' href='/stylesheets/style.css'>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    {{# if isHomePage}}
+    <div id="loader-wrapper">
+      <div id="loader">
+          <img src="/images/assets/preloader.gif">
+      </div>
+    </div>
+    {{/if}}
+
+    {{> navbar}}
+    <div class="main-container">
+      {{> alerts}}
+      {{{body}}}
+      {{> footer}}
+    </div>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="/javascripts/categoryNavbar.js"></script>
+    <script src="/javascripts/alert.js"></script>
+    <script src="/javascripts/preloader.js"></script>
+  </body>
+</html>

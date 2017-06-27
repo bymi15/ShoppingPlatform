@@ -1,0 +1,20 @@
+{{# if success_message}}
+<div id="message">
+    <div style="padding: 5px;">
+        <div id="inner-message" class="alert alert-success">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{success_message}}
+        </div>
+    </div>
+</div>
+{{/if}}
+{{# if error_message}}
+<div id="message">
+    <div style="padding: 5px;">
+        <div id="inner-message" class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{error_message}}
+        </div>
+    </div>
+</div>
+{{/if}}
