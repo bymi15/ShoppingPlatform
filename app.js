@@ -20,7 +20,7 @@ var Category = require('./models/category');
 
 var app = express();
 
-mongoose.connect('localhost:27017/shoppingplatform');
+mongoose.connect('mongodb://ds139122.mlab.com:39122/heroku_wjmqlnqn');
 
 require('./config/passport');
 
