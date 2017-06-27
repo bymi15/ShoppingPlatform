@@ -3,7 +3,10 @@ var Category = require('../models/category');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
-mongoose.connect('localhost:27017/shoppingplatform');
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config')[env];
+
+mongoose.connect(config.databaseURI);
 
 var categories = [
     new Category({categoryName: 'Art'}),
