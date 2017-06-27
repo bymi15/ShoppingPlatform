@@ -20,7 +20,10 @@ var Category = require('./models/category');
 
 var app = express();
 
-mongoose.connect('localhost:27017/shoppingplatform');
+var env = process.env.NODE_ENV || 'development';
+var config = require('./config')[env];
+
+mongoose.connect(config.databaseURI);
 
 require('./config/passport');
 
