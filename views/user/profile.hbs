@@ -1,0 +1,79 @@
+<div class="container">
+    <div class="row">
+        <h1>My Profile</h1>
+        <hr>
+        <div class="col-xs-12 col-md-6">
+            <h3>Account details</h3>
+                <div class="well">
+                    <label>Full Name:</label>
+                    <p>{{user.fullName}}</p>
+                    <label>Email Address:</label>
+                    <p>{{user.email}}</p>
+                </div>
+        </div>
+        <div class="col-xs-12 col-md-6">
+            <h3>Shipping Address <button type="button" id="editAddress" class="btn btn-primary btn-sm">Edit</button></h3>
+                <div id="editAddressDisplay" class="well hidden">
+                    <form action="/editShippingAddress" method="post">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <label for="address1">Address Line 1</label>
+                                    <input type="text" id="address1" name="address1" class="form-control" value="{{shipping.address1}}" required>
+                                </div>
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <label for="address2">Address Line 2</label>
+                                    <input type="text" id="address2" name="address2" class="form-control" value="{{shipping.address2}}">
+                                </div>
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" id="city" name="city" class="form-control" value="{{shipping.city}}" required>
+                                </div>
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <label for="postalCode">Postal Code</label>
+                                    <input type="text" id="postalCode" name="postalCode" class="form-control" value="{{shipping.postalCode}}" required>
+                                </div>
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-default">Save Changes</button>
+                                    <button type="button" class="btn btn-default" id="cancelEdit">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            {{# if shipping}}
+                <div id="shippingAddressDisplay" class="well">
+                    <p>{{shipping.address1}}</p>
+                    <p>{{shipping.address2}}</p>
+                    <p>{{shipping.city}}</p>
+                    <p>{{shipping.postalCode}}</p>
+                </div>
+            {{else}}
+                You have no shipping address information stored.<br>
+                Press the 'Edit' button to add your address.
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+  $("#editAddress").click(function(e){
+    $("#shippingAddressDisplay").addClass('hidden');
+    $("#editAddressDisplay").removeClass('hidden');
+  });
+
+  $("#cancelEdit").click(function(e){
+    $("#editAddressDisplay").addClass('hidden');
+    $("#shippingAddressDisplay").removeClass('hidden');
+  });
+</script>

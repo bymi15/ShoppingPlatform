@@ -1,0 +1,63 @@
+<div class="container">
+    <h1>My Products For Sale</h1>
+        <hr>
+        {{# if products }}
+            <div class="well">
+                <table class="table">
+                    <thead>
+                        <tr>
+                          <th>Product Title</th>
+                          <th>Stock</th>
+                          <th>Price</th>
+                          <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {{# each products }}
+                    <tr>
+                        <td><a href="/product/{{this._id}}" style="text-decoration: none;">{{this.title}}</a></td>
+                        <td>{{this.stock}}</td>
+                        <td>${{this.price}}</td>
+                        <td>
+                            <a href="/adjustStock/{{this._id}}" stock-level="{{this.stock}}" class="adjustStock btn btn-success" role="button">Adjust stock</a>
+                            <a href="/removeProduct/{{this._id}}" class="removeProduct btn btn-danger" role="button">Remove</a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        {{else}}
+            <h5>You have no products</h5>
+            <a href="/sell" class="btn btn-primary" role="button">Sell a product</a>
+        {{/if}}
+</div>
+
+<script>
+  $(".removeProduct").click(function(e) {
+    e.preventDefault();
+    var targetUrl = $(this).attr("href");
+
+    if (confirm("Are you sure you wish to remove this product?")) {
+        window.location.href = targetUrl;
+    }
+  });
+
+  $(".adjustStock").click(function(e){
+    e.preventDefault();
+    var targetUrl = $(this).attr("href");
+    var currentStock = $(this).attr("stock-level");
+
+    var stock = prompt("Enter the new stock", currentStock);
+
+    var stockInt = parseInt(stock);
+
+    if (stock == currentStock || stock == null || stock == "" || stockInt < 0) {
+        return;
+    } else {
+        var newURL = targetUrl + "/" + stock;
+        window.location.href = newURL;
+    }
+  });
+</script>

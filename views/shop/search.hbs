@@ -1,0 +1,50 @@
+<div class="container">
+    {{#if noProducts}}
+        <h1 style="font-size: 60px;" class="text-center">No products were found</h1>
+    {{else}}
+        <div class="text-center" style="margin-top:20px;">
+            <h1 style="font-size: 60px;">Search Results {{#if categoryName}}- {{categoryName}}{{/if}}</h1>
+        </div>
+
+        {{# if products }}
+        <div class="col-md-12" style="text-align: right; margin-bottom:5px;">
+            <label style="font-weight:400;">Page {{currentPage}} - {{pages.length}} of {{numProducts}} products</label>
+        </div>
+        {{/if}}
+
+        <div class="row">
+            {{# each products }}
+                <div class="col-sm-6 col-md-3">
+                    <div class="thumbnail">
+                        <a href="/product/{{this._id}}">
+                            <img src="{{ this.imagePath }}" class="img-responsive">
+                        </a>
+                        <div class="caption">
+                            <div class="heading">
+                                <a href="/product/{{this._id}}" style="text-decoration: none;"><h4 class="name">{{ this.title }}</h4></a>
+                                <p class="category">{{ this.category.categoryName }}</p>
+                                <p class="seller">Sold by {{ this.seller.fullName }}</p>
+                                <p class="price">${{ this.price }}</p>
+                            </div>
+                            <div class="text-center">
+                                <a href="/addToCart/{{this._id}}" class="btn btn-success" role="button">Add to Cart</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+
+        <nav aria-label="Page Navigation">
+            <ul class="pagination">
+                {{# each pages }}
+                {{#if ../escapedCategoryName}}
+                <li {{#if this.current}}class="active"{{/if}}><a href="/search/{{this.num}}?q={{../searchString}}&cat={{../escapedCategoryName}}">{{this.num}}</a></li>
+                {{else}}
+                <li {{#if this.current}}class="active"{{/if}}><a href="/search/{{this.num}}?q={{../searchString}}">{{this.num}}</a></li>
+                {{/if}}
+                {{/each}}
+            </ul>
+        </nav>
+    {{/if}}
+</div>
