@@ -39,40 +39,13 @@ router.get('/logout', isLoggedIn, function(req, res, next) {
 });
 
 router.get('/profile', isLoggedIn, function(req, res, next) {
-    Product.find({seller: req.user}).sort({ createdAt: -1, _id: -1}).exec(function(err, products){
+    ShippingAddress.findOne({user: req.user}, function(err, shipping){
         if(err){
             req.flash("error_message", "An error has occured! Please try again.");
-            return res.redirect('/');
+            return res.redirect('/checkout');
         }
 
-        Order.find({user: req.user}, function(err, orders){
-            if(err){
-                req.flash("error_message", "An error has occured! Please try again.");
-                return res.redirect('/');
-            }
-
-            ShippingAddress.findOne({user: req.user}, function(err, shipping){
-                if(err){
-                    req.flash("error_message", "An error has occured! Please try again.");
-                    return res.redirect('/checkout');
-                }
-
-                var cart;
-                var itemsProcessed = 0;
-                orders.forEach(function(order){
-                    cart = new Cart(order.cart);
-                    order.items = cart.generateArray();
-                    //var date = new Date(order.createdAt);
-                    order.datetime = order.createdAt;//date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-                    itemsProcessed++;
-                    if(itemsProcessed === orders.length){
-                        return res.render('user/profile', {products: products, orders: orders,  shipping: shipping});
-                    }
-                });
-
-            });
-        });
-
+        res.render('user/profile', {shipping: shipping});
     });
 });
 
@@ -99,6 +72,10 @@ router.get('/orders', isLoggedIn, function(req, res, next) {
             if(err){
                 req.flash("error_message", "An error has occured! Please try again.");
                 return res.redirect('back');
+            }
+
+            if(!orders){
+                return res.render('user/orders', {orders: null});
             }
 
             var cart;
