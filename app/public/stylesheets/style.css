@@ -244,12 +244,14 @@ a{
     overflow:hidden !important;
     text-overflow: ellipsis;
     font-weight: 400;
+    padding-left: 5px;
 }
 
 .caption .heading .category{
     color: #666666;
     margin-top: 5px;
     margin-bottom: 0px;
+    padding-left: 5px;
 }
 
 .caption .heading .seller{
@@ -257,6 +259,8 @@ a{
     margin-top: 5px;
     margin-bottom: 0px;
     font-weight: 500;
+    padding-left: 5px;
+    padding-bottom: 5px;
 }
 
 .caption .heading .stock{
@@ -271,6 +275,7 @@ a{
     font-size: 24px;
     margin-top: 10px;
     margin-bottom: 5px;
+    padding-left: 5px;
 }
 
 .caption .description{

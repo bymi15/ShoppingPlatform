@@ -38,13 +38,19 @@
             <div class="col-sm-12">
                 <h2>Product Reviews</h2>
                 <hr>
+                <h4 style="font-weight:bold;">Average Rating </h4>
+                <h4 class="rating-description">{{numRating}} reviews</h4>
+                <div id="averageRating">{{averageRating}}</div>
+                <p class="rating-description">{{averageRating}} out of 5 stars</p>
+                <hr>
+                <h4 style="font-weight:bold;">All reviews</h4>
                 {{# if reviews }}
                     <section class="review-list">
                     {{# each reviews }}
                         <article class="row">
                             <div class="col-md-2 col-sm-2 hidden-xs">
                                 <div class="rating-stars">{{this.rating}}</div>
-                                <p class="rating-description">{{this.rating}} star(s) out of 5</p>
+                                <p class="rating-description">{{this.rating}} out of 5 stars</p>
                             </div>
                             <div class="col-md-10 col-sm-10">
                                 <div class="panel panel-default arrow left">
@@ -58,7 +64,6 @@
                                               {{this.description}}
                                             </p>
                                         </div>
-                                        <p class="text-right"><a href="#" class="btn btn-default btn-sm"><i class="fa fa-reply"></i> reply</a></p>
                                     </div>
                                 </div>
                             </div>
@@ -84,4 +89,9 @@ $(".rating-stars").each(function(i, div) {
     });
 });
 
+var ratingVal = $("#averageRating").text();
+var averageRating = $("#averageRating").rateYo({
+    rating: ratingVal,
+    readOnly: true
+});
 </script>

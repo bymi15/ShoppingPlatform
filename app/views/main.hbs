@@ -67,6 +67,7 @@
                             <div class="heading">
                                 <a href="/product/{{this._id}}" style="text-decoration: none;"><h4 class="name">{{ this.title }}</h4></a>
                                 <p class="seller">Sold by {{ this.seller.fullName }}</p>
+                                <div class="rating-stars">{{this.averageRating}}</div>
                                 <p class="price">${{ this.price }}</p>
                             </div>
                             <div class="text-center">
@@ -92,6 +93,15 @@
             centerImage: false,
             buttons: false,
             fade: true
+        });
+
+        $(".rating-stars").each(function(i, div) {
+            var rating = parseFloat($(this).text());
+            var readOnly = $(this).rateYo({
+                rating: rating,
+                starWidth: "15px",
+                readOnly: true
+            });
         });
     });
 </script>
