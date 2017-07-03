@@ -2,9 +2,9 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var schema = new Schema({
+    product: {type: Schema.Types.ObjectId, ref: 'Product'},
     sum: {type:Number, default: 0},
-    count: {type:Number, default: 0},
-    users: {type: Schema.Types.Mixed, required:false},
+    count: {type:Number, default: 0}
 },
 {
     timestamps: true

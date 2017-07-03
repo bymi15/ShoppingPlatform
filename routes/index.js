@@ -10,6 +10,7 @@ var mongoose = require('mongoose');
 var Product = require('../models/product');
 var Category = require('../models/category');
 var Order = require('../models/order');
+var Review = require('../models/review');
 var ShippingAddress = require('../models/shippingAddress');
 
 const uuidV4 = require('uuid/v4');
@@ -282,6 +283,45 @@ router.post('/editShippingAddress', isLoggedIn, function(req, res, next) {
     );
 });
 
+router.get('/writeReview/:id', isLoggedIn, function(req, res, next) {
+    var productId = req.params.id;
+    Product.findById(productId, function(err, product){
+        if(err){
+            req.flash("error_message", "An error has occured! Please try again.");
+            return res.redirect('back');
+        }
+
+        res.render('shop/writeReview', {product: product});
+    });
+});
+
+router.post('/writeReview/:id', isLoggedIn, function(req, res, next) {
+    var productId = req.params.id;
+
+    Product.findById(productId, function(err, product){
+        if(err){
+            req.flash("error_message", "An error has occured! Please try again.");
+            return res.redirect('back');
+        }
+
+        var review = new Review();
+        review.rating = req.body.ratingValue;
+        review.description = req.body.description;
+        review.reviewBy = req.user;
+        review.product = product;
+
+        review.save(function(err, result){
+            if(err){
+                req.flash("error_message", "An error has occured! Please try again.");
+                return res.redirect('back');
+            }
+
+            req.flash("success_message", "Success! Thank you for submitting a review.");
+            res.redirect('/product/' + productId);
+        });
+    });
+});
+
 router.get('/sell', isLoggedIn, function(req, res, next) {
     res.render('shop/sell', {});
 });
@@ -357,32 +397,61 @@ router.get('/product/:id', function(req, res, next) {
                 req.session.viewed.push({id: productId});
 
                 if(result){
-                    if(result.hasLowStock()){
-                        return res.render('shop/product', { product: result, hasLowStock: true });
-                    }else if(result.outOfStock()){
-                        return res.render('shop/product', { product: result, outOfStock: true });
-                    }else{
-                        return res.render('shop/product', { product: result, inStock: true });
-                    }
-                }
+                    //retrieve product reviews
+                    Review.find({product: product}).populate(['reviewBy']).exec(function(err, reviews){
+                        if(err){
+                            req.flash("error_message", "An error has occured! Please try again.");
+                            res.redirect('back');
+                        }
 
-                res.redirect('back');
+                        for(var i = 0; i < reviews.length; i++){
+                            var date = new Date(reviews[i].createdAt);
+                            reviews[i].date = date.toDateString();
+                        }
+
+                        if(result.hasLowStock()){
+                            return res.render('shop/product', { product: result, hasLowStock: true, reviews: reviews });
+                        }else if(result.outOfStock()){
+                            return res.render('shop/product', { product: result, outOfStock: true, reviews: reviews });
+                        }else{
+                            return res.render('shop/product', { product: result, inStock: true, reviews: reviews });
+                        }
+                    });
+                }else{
+                    req.flash("error_message", "An error has occured! Please try again.");
+                    res.redirect('back');
+                }
             });
         });
     }else{
         Product.findById(productId).populate(['seller', 'category']).exec(function(err, product){
 
             if(product){
-                if(product.hasLowStock()){
-                    return res.render('shop/product', { product: product, hasLowStock: true });
-                }else if(product.outOfStock()){
-                    return res.render('shop/product', { product: product, outOfStock: true });
-                }else{
-                    return res.render('shop/product', { product: product, inStock: true });
-                }
-            }
+                //retrieve product reviews
+                Review.find({product: product}).populate(['reviewBy']).exec(function(err, reviews){
+                    if(err){
+                        req.flash("error_message", "An error has occured! Please try again.");
+                        res.redirect('back');
+                    }
 
-            res.redirect('back');
+                    for(var i = 0; i < reviews.length; i++){
+                        var date = new Date(reviews[i].createdAt);
+                        reviews[i].date = date.toDateString();
+                    }
+
+
+                    if(product.hasLowStock()){
+                        return res.render('shop/product', { product: product, hasLowStock: true, reviews: reviews });
+                    }else if(product.outOfStock()){
+                        return res.render('shop/product', { product: product, outOfStock: true, reviews: reviews });
+                    }else{
+                        return res.render('shop/product', { product: product, inStock: true, reviews: reviews });
+                    }
+                });
+            }else{
+                    req.flash("error_message", "An error has occured! Please try again.");
+                    res.redirect('back');
+            }
         });
     }
 });
