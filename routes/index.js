@@ -316,8 +316,18 @@ router.post('/writeReview/:id', isLoggedIn, function(req, res, next) {
                 return res.redirect('back');
             }
 
-            req.flash("success_message", "Success! Thank you for submitting a review.");
-            res.redirect('/product/' + productId);
+            product.ratingSum = product.ratingSum + parseInt(req.body.ratingValue);
+            product.ratingCount = product.ratingCount + 1;
+
+            product.save(function(err, result){
+                if(err){
+                    req.flash("error_message", "An error has occured! Please try again.");
+                    return res.redirect('/checkout');
+                }
+
+                req.flash("success_message", "Success! Thank you for submitting a review.");
+                res.redirect('/product/' + productId);
+            });
         });
     });
 });
@@ -409,12 +419,20 @@ router.get('/product/:id', function(req, res, next) {
                             reviews[i].date = date.toDateString();
                         }
 
+                        var averageRating = 0;
+                        var numRating = 0;
+
+                        if(result.ratingCount >= 1){
+                            averageRating = (result.ratingSum / result.ratingCount).toFixed(1);
+                            numRating = result.ratingCount;
+                        }
+
                         if(result.hasLowStock()){
-                            return res.render('shop/product', { product: result, hasLowStock: true, reviews: reviews });
+                            return res.render('shop/product', { product: result, hasLowStock: true, reviews: reviews, averageRating: averageRating, numRating: numRating });
                         }else if(result.outOfStock()){
-                            return res.render('shop/product', { product: result, outOfStock: true, reviews: reviews });
+                            return res.render('shop/product', { product: result, outOfStock: true, reviews: reviews, averageRating: averageRating, numRating: numRating });
                         }else{
-                            return res.render('shop/product', { product: result, inStock: true, reviews: reviews });
+                            return res.render('shop/product', { product: result, inStock: true, reviews: reviews, averageRating: averageRating, numRating: numRating });
                         }
                     });
                 }else{
@@ -439,18 +457,25 @@ router.get('/product/:id', function(req, res, next) {
                         reviews[i].date = date.toDateString();
                     }
 
+                    var averageRating = 0;
+                    var numRating = 0;
+
+                    if(product.ratingCount >= 1){
+                        averageRating = (product.ratingSum / product.ratingCount).toFixed(1);
+                        numRating = product.ratingCount;
+                    }
 
                     if(product.hasLowStock()){
-                        return res.render('shop/product', { product: product, hasLowStock: true, reviews: reviews });
+                        return res.render('shop/product', { product: product, hasLowStock: true, reviews: reviews, averageRating: averageRating, numRating: numRating });
                     }else if(product.outOfStock()){
-                        return res.render('shop/product', { product: product, outOfStock: true, reviews: reviews });
+                        return res.render('shop/product', { product: product, outOfStock: true, reviews: reviews, averageRating: averageRating, numRating: numRating });
                     }else{
-                        return res.render('shop/product', { product: product, inStock: true, reviews: reviews });
+                        return res.render('shop/product', { product: product, inStock: true, reviews: reviews, averageRating: averageRating, numRating: numRating });
                     }
                 });
             }else{
-                    req.flash("error_message", "An error has occured! Please try again.");
-                    res.redirect('back');
+                req.flash("error_message", "An error has occured! Please try again.");
+                res.redirect('back');
             }
         });
     }
@@ -641,6 +666,7 @@ router.get('/shop/:pageNum', function(req, res) {
             req.flash("error_message", "An error has occured! Please try again.");
             res.redirect('back');
         }
+
         var totalPages = Math.ceil(result.total / 12);
         for(var i = 1; i <= totalPages; i++){
             if(i==pageNum){
@@ -649,7 +675,17 @@ router.get('/shop/:pageNum', function(req, res) {
                 pages.push({num: i, current: false});
             }
         }
-        res.render('shop/index', { products: result.docs, pages: pages, currentPage: pageNum, numProducts: result.total});
+
+        var products = result.docs;
+        for(var i = 0; i < products.length; i++){
+            if(products[i].ratingCount >= 1){
+                products[i].averageRating = (products[i].ratingSum / products[i].ratingCount).toFixed(1);
+            }else{
+                products[i].averageRating = 0;
+            }
+        }
+
+        res.render('shop/index', { products: products, pages: pages, currentPage: pageNum, numProducts: result.total});
     });
 });
 
@@ -665,7 +701,16 @@ router.get('/shop', function(req, res, next) {
         for(var i = 2; i <= totalPages; i++){
             pages.push({num: i, current: false})
         }
-        res.render('shop/index', { products: result.docs, pages: pages, currentPage: 1, numProducts: result.total});
+
+        var products = result.docs;
+        for(var i = 0; i < products.length; i++){
+            if(products[i].ratingCount >= 1){
+                products[i].averageRating = (products[i].ratingSum / products[i].ratingCount).toFixed(1);
+            }else{
+                products[i].averageRating = 0;
+            }
+        }
+        res.render('shop/index', { products: products, pages: pages, currentPage: 1, numProducts: result.total});
     });
 });
 
@@ -675,6 +720,14 @@ router.get('/', function(req, res, next) {
         if(err){
             req.flash("error_message", "An error has occured! Please try again.");
             res.redirect('back');
+        }
+
+        for(var i = 0; i < products.length; i++){
+            if(products[i].ratingCount >= 1){
+                products[i].averageRating = (products[i].ratingSum / products[i].ratingCount).toFixed(1);
+            }else{
+                products[i].averageRating = 0;
+            }
         }
 
         res.render('main', { products: products });

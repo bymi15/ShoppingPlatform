@@ -11,7 +11,9 @@ var schema = new Schema({
     attributes: {type: Schema.Types.Mixed, required:false},
     stock: {type:Number, required:true},
     views: {type:Number, default: 0},
-    price: {type:Number, required:true}
+    price: {type:Number, required:true},
+    ratingSum: {type:Number, default: 0},
+    ratingCount: {type:Number, default: 0}
 },
 {
     timestamps: true
