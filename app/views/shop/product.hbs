@@ -1,33 +1,87 @@
 <div class="container">
-    <div class="row">
-        <div class="col-sm-6 col-md-4">
-            <div class="thumbnail">
-                <img src="{{ product.imagePath }}" class="img-responsive">
+    <div class="container-grey">
+        <div class="row">
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="{{ product.imagePath }}" class="img-responsive">
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-8">
+                {{# if hasLowStock }}
+                    <span class="stockIndicator label label-warning">Low Stock</span>
+                {{/if}}
+                {{# if outOfStock }}
+                    <span class="stockIndicator label label-danger">Out of stock</span>
+                {{/if}}
+                {{# if inStock }}
+                    <span class="stockIndicator label label-success">In stock</span>
+                {{/if}}
+
+                <div class="caption">
+                    <div class="heading">
+                        <h3 class="name">{{ product.title }}</h3>
+                        <p class="category">{{ product.category.categoryName }}</p>
+                        <p class="seller">Sold by {{ product.seller.fullName }}</p>
+                        <p class="price">${{ product.price }}</p>
+                        <p class="views"><i class="fa fa-eye" aria-hidden="true"></i> {{product.views}}</p>
+                    </div>
+                    <p class="description">{{ product.description }}</p>
+                    <br>
+                    <a href="/addToCart/{{product._id}}" class="btn btn-success" role="button"><i class="fa fa-shopping-cart"></i> Add to Cart</a>
+                </div>
             </div>
         </div>
-        <div class="col-sm-6 col-md-8">
-            {{# if hasLowStock }}
-                <span class="stockIndicator label label-warning">Low Stock</span>
-            {{/if}}
-            {{# if outOfStock }}
-                <span class="stockIndicator label label-danger">Out of stock</span>
-            {{/if}}
-            {{# if inStock }}
-                <span class="stockIndicator label label-success">In stock</span>
-            {{/if}}
+    </div>
 
-            <div class="caption">
-                <div class="heading">
-                    <h3 class="name">{{ product.title }}</h3>
-                    <p class="category">{{ product.category.categoryName }}</p>
-                    <p class="seller">Sold by {{ product.seller.fullName }}</p>
-                    <p class="price">${{ product.price }}</p>
-                    <p class="views"><i class="fa fa-eye" aria-hidden="true"></i> {{product.views}}</p>
-                </div>
-                <p class="description">{{ product.description }}</p>
-                <br>
-                <a href="/addToCart/{{product._id}}" class="btn btn-success" role="button"><i class="fa fa-shopping-cart"></i> Add to Cart</a>
+    <div class="container-grey" style="padding-left: 30px; padding-right: 30px;">
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>Product Reviews</h2>
+                <hr>
+                {{# if reviews }}
+                    <section class="review-list">
+                    {{# each reviews }}
+                        <article class="row">
+                            <div class="col-md-2 col-sm-2 hidden-xs">
+                                <div class="rating-stars">{{this.rating}}</div>
+                                <p class="rating-description">{{this.rating}} star(s) out of 5</p>
+                            </div>
+                            <div class="col-md-10 col-sm-10">
+                                <div class="panel panel-default arrow left">
+                                    <div class="panel-body">
+                                        <header class="text-left">
+                                            <div class="review-user"><i class="fa fa-user"></i> {{this.reviewBy.fullName}}</div>
+                                            <time class="review-date" datetime="16-12-2014 01:05"><i class="fa fa-clock-o"></i> {{this.date}}</time>
+                                        </header>
+                                        <div class="review-post">
+                                            <p>
+                                              {{this.description}}
+                                            </p>
+                                        </div>
+                                        <p class="text-right"><a href="#" class="btn btn-default btn-sm"><i class="fa fa-reply"></i> reply</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    {{/each}}
+                    </section>
+                {{else}}
+                    <h5>This product has no reviews.</h5>
+                    <a href="/writeReview/{{product._id}}" class="btn btn-primary" role="button"><i class="fa fa-pencil"></i> Write a review</a>
+                {{/if}}
             </div>
         </div>
     </div>
 </div>
+
+<script>
+
+$(".rating-stars").each(function(i, div) {
+    var rating = parseInt($(this).text());
+    var readOnly = $(this).rateYo({
+        rating: rating,
+        readOnly: true
+    });
+});
+
+</script>

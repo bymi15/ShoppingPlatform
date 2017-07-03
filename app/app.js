@@ -77,6 +77,7 @@ app.use('/user', userRoutes);
 app.use('/', index);
 
 app.use('/slider-pro', express.static(__dirname + '/node_modules/slider-pro/dist/'));
+app.use('/rateyo', express.static(__dirname + '/node_modules/rateyo/min/'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
