@@ -46,4 +46,26 @@ module.exports = function Cart(oldCart) {
         }
         return arr;
     };
+
+    this.groupBySeller = function(){
+        var collection = this.generateArray();
+
+        var val = 0;
+        var index = 0;
+        var values = [];
+        var result = [];
+
+        for (var i = 0; i < collection.length; i++) {
+            val = collection[i].item.seller;
+            index = values.indexOf(val);
+            if (index > -1)
+                result[index].push(collection[i]);
+            else {
+                values.push(val);
+                result.push([collection[i]]);
+            }
+        }
+
+        return result;
+    };
 };

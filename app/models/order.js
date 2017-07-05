@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 var schema = new Schema({
     user: {type: Schema.Types.ObjectId, ref: 'User'},
     cart: {type: Object, required:true},
-    paymentId: {type:String, required:true},
+    paymentId: {type:String, required:false},
     shippingAddress: {type: Schema.Types.ObjectId, ref: 'ShippingAddress'}
 },
 {

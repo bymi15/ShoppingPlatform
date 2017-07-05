@@ -5,6 +5,8 @@ var flash = require('connect-flash');
 var async = require('async');
 var path = require('path');
 var fs = require('fs');
+var qs = require('qs');
+var request = require('request');
 var mongoose = require('mongoose');
 
 var Product = require('../models/product');
@@ -18,6 +20,14 @@ const uuidV4 = require('uuid/v4');
 var multer = require('multer');
 var upload = multer({ dest: 'public/images/uploads/' });
 
+
+var CLIENT_ID = 'ca_AxQsVkEHOuVczyLUN0Ds8ODiarYMFhnR';
+var CLIENT_SECRET = 'sk_test_9zHUItnUCbHQWtbcejrNLnT1';
+
+if(process.env.NODE_ENV == 'production'){
+    CLIENT_ID = 'ca_AxQsKmiySsA1vXM7gav41MeRSAGjHIZw';
+    CLIENT_SECRET = 'sk_live_X7CV6KZFuoEBvv26o3eUkRSR';
+}
 
 router.get('/addToCart/:id', function(req, res, next) {
     var productId = req.params.id;
@@ -42,6 +52,92 @@ router.get('/addToCart/:id', function(req, res, next) {
         req.session.cart = cart;
         req.flash("success_message", "'" + product.title + "' was successfully added to your cart!");
         res.redirect('back');
+    });
+});
+
+router.get("/stripe/connect", isLoggedIn, function(req, res, next) {
+    // Redirect to Stripe /oauth/authorize endpoint
+    res.redirect("https://connect.stripe.com/oauth/authorize?" + qs.stringify({
+        response_type: "code",
+        scope: "read_write",
+        client_id: CLIENT_ID
+    }));
+});
+
+router.get("/stripe/disconnect", isLoggedIn, function(req, res, next) {
+    // Make /oauth/token endpoint POST request
+    request.post({
+        url: 'https://connect.stripe.com/oauth/deauthorize',
+        form: {
+          stripe_user_id: req.user.stripeUserId,
+          client_secret: CLIENT_SECRET,
+          client_id: CLIENT_ID
+        }
+    }, function(err, r, body) {
+        if(err || JSON.parse(body).error){
+            req.flash("error_message", "An error has occured! Please try again.");
+            return res.redirect('/user/profile');
+        }
+
+        var currentUser = req.user;
+        currentUser.stripeCardId = null;
+        currentUser.stripeCardBrand = null;
+        currentUser.stripeCardLastFour = null;
+        currentUser.stripeUserId = null;
+        currentUser.stripeRefreshToken = null;
+        currentUser.stripeAccessToken = null;
+
+        currentUser.save(function(err, result){
+            if(err){
+                req.flash("error_message", "An error has occured! Please try again.");
+                return res.redirect('/user/profile');
+            }
+
+            req.flash("success_message", "Your account has been successfully disconnected from Stripe.");
+            return res.redirect('/user/profile');
+        });
+    });
+});
+
+router.get('/stripe/callback', isLoggedIn, function(req, res, next) {
+    var authCode = req.query.code;
+    var err = req.query.error;
+    if(err){
+        req.flash("error_message", "An error has occured! Please try again.");
+        return res.redirect('/user/profile');
+    }
+
+    // Make /oauth/token endpoint POST request
+    request.post({
+        url: 'https://connect.stripe.com/oauth/token',
+        form: {
+          grant_type: "authorization_code",
+          client_id: CLIENT_ID,
+          code: authCode,
+          client_secret: CLIENT_SECRET
+        }
+    }, function(err, r, body) {
+        if(err){
+            req.flash("error_message", "An error has occured! Please try again.");
+            return res.redirect('/user/profile');
+        }
+
+        var bodyObj = JSON.parse(body);
+
+        var currentUser = req.user;
+        currentUser.stripeUserId = bodyObj.stripe_user_id;
+        currentUser.stripeRefreshToken = bodyObj.refresh_token;
+        currentUser.stripeAccessToken =bodyObj.access_token;
+
+        currentUser.save(function(err, result){
+            if(err){
+                req.flash("error_message", "An error has occured! Please try again.");
+                return res.redirect('/user/profile');
+            }
+
+            req.flash("success_message", "Success! Your account has been connected with Stripe.");
+            res.redirect('/user/profile');
+        });
     });
 });
 
@@ -116,10 +212,16 @@ router.get('/checkout', isLoggedIn, function(req, res, next) {
         return res.redirect('/cart');
     }
 
-    var cart = new Cart(req.session.cart);
+    var hasExistingCard = false;
+    if(req.user.stripeCustomerId){
+        hasExistingCard = true;
+    }
 
+    var cart = new Cart(req.session.cart);
     var cartArr = cart.generateArray();
+
     var productsOutOfStock = [];
+
     async.forEachOf(cartArr, function(cartItem, key, callback){
         var productId = cartItem.item._id;
         var quantity = cartItem.quantity;
@@ -158,9 +260,9 @@ router.get('/checkout', isLoggedIn, function(req, res, next) {
                 }
 
                 if(shipping){
-                    res.render('shop/checkout', {cart: cart, address1: shipping.address1, address2: shipping.address2, city: shipping.city, postalCode: shipping.postalCode});
+                    res.render('shop/checkout', {cart: cart, address1: shipping.address1, address2: shipping.address2, city: shipping.city, postalCode: shipping.postalCode, hasExistingCard: hasExistingCard});
                 }else{
-                    res.render('shop/checkout', {cart: cart});
+                    res.render('shop/checkout', {cart: cart, hasExistingCard: hasExistingCard});
                 }
             });
         }
@@ -173,47 +275,134 @@ router.post('/checkout', isLoggedIn, function(req, res, next) {
     }
 
     var cart = new Cart(req.session.cart);
-    var stripe = require("stripe")(
-      "sk_test_9zHUItnUCbHQWtbcejrNLnT1"
-    );
+    var stripe = require("stripe")(CLIENT_SECRET);
 
-    stripe.charges.create({
-      amount: cart.totalPrice * 100,
-      currency: "usd",
-      source: req.body.stripeToken, // obtained with Stripe.js
-      description: "Test charge"
-    }, function(err, charge) {
+    var newPayment = (req.body.radioPayment == "useNewPayment");
+
+    async.parallel({
+        createStripeCustomer: function(callback) {
+            var currentUser = req.user;
+            if(!currentUser.stripeCustomerId || newPayment){
+                // Create a Stripe customer:
+                stripe.customers.create({
+                    email: currentUser.email
+                }).then(function(customer) {
+                    if(newPayment && currentUser.stripeCardId){
+                        stripe.customers.deleteCard(
+                            currentUser.stripeCustomerId,
+                            currentUser.stripeCardId,
+                            function(err, confirmation) {
+                                if(err){
+                                    return callback(err);
+                                }
+
+                                stripe.customers.createSource(customer.id,
+                                  { source:  req.body.stripeToken }, function(err, card) {
+                                    if(err){
+                                        return callback(err);
+                                    }
+
+                                    currentUser.stripeCustomerId = customer.id;
+                                    currentUser.stripeCardId = card.id;
+                                    currentUser.stripeCardBrand = card.brand;
+                                    currentUser.stripeCardLastFour = card.last4;
+
+                                    return currentUser.save(function(err, result){
+                                        if(err){
+                                            return callback(err);
+                                        }
+
+                                        return callback(null, result);
+                                    });
+                                });
+                            }
+                        );
+                    }else{
+                        stripe.customers.createSource(customer.id,
+                          { source:  req.body.stripeToken }, function(err, card) {
+                            if(err){
+                                return callback(err);
+                            }
+
+                            currentUser.stripeCustomerId = customer.id;
+                            currentUser.stripeCardId = card.id;
+                            currentUser.stripeCardBrand = card.brand;
+                            currentUser.stripeCardLastFour = card.last4;
+
+                            return currentUser.save(function(err, result){
+                                if(err){
+                                    return callback(err);
+                                }
+
+                                return callback(null, result);
+                            });
+                        });
+                    }
+                });
+            }else{
+                return callback();
+            }
+
+        }
+    }, function(err, results) {
         if(err){
-            req.flash("error_message", err.message);
+            req.flash("error_message", "An error has occured! Please try again.");
             return res.redirect('/checkout');
         }
 
-        //update stock quantity of the products purchased
-        var cartArr = cart.generateArray();
+        var cartArr = cart.groupBySeller();
 
-        async.forEachOf(cartArr, function(cartItem, key, callback){
-            var productId = cartItem.item._id;
-            var quantity = cartItem.quantity;
+        async.forEachOf(cartArr, function(items, key, callback){
+            var seller = items[0].item.seller;
+            var totalPrice = 0;
 
-            Product.findById(productId, function(err, product){
-                if(err || !product){
-                    return callback(err);
-                }
+            async.forEachOf(items, function(cartItem, key, callback){
+                var productId = cartItem.item._id;
+                var quantity = cartItem.quantity;
+                totalPrice = totalPrice + (quantity * cartItem.item.price);
 
-                product.stock -= quantity;
-
-                product.save(function(err, result){
-                    if(err){
+                Product.findById(productId, function(err, product){
+                    if(err || !product){
                         return callback(err);
                     }
+
+                    product.stock -= quantity;
+
+                    product.save(function(err, result){
+                        if(err){
+                            return callback(err);
+                        }
+
+                        callback();
+                    });
+                });
+
+            }, function(err){
+                if(err){
+                    req.flash("error_message", "An error has occured! Please try again.");
+                    return res.redirect('/checkout');
+                }
+
+                stripe.charges.create({
+                    amount: totalPrice * 100,
+                    currency: "usd",
+                    customer: req.user.stripeCustomerId,
+                    destination: seller.stripeUserId,
+                    transfer_group: seller.id,
+                }).then(function(charge) {
+                    if(err){
+                        req.flash("error_message", err.message);
+                        return res.redirect('/checkout');
+                    }
+
                     callback();
                 });
+
             });
 
         }, function(err){
-            //all async tasks completed
             if(err){
-                req.flash("error_message", "An error has occured! Please try again.");
+                req.flash("error_message", err.message);
                 return res.redirect('/checkout');
             }
 
@@ -239,7 +428,6 @@ router.post('/checkout', isLoggedIn, function(req, res, next) {
                     var order = new Order({
                         user: req.user,
                         cart: cart,
-                        paymentId: charge.id,
                         shippingAddress: shipping
                     });
 
@@ -249,12 +437,14 @@ router.post('/checkout', isLoggedIn, function(req, res, next) {
                             return res.redirect('/checkout');
                         }
                         req.session.cart = null;
-                        res.render('shop/orderSummary', {shipping: shipping, products: cart.items, total: cart.totalPrice});
+                        return res.render('shop/orderSummary', {shipping: shipping, products: cart.items, total: cart.totalPrice});
                     });
                 }
             );
         });
+
     });
+
 });
 
 router.post('/editShippingAddress', isLoggedIn, function(req, res, next) {
@@ -333,7 +523,12 @@ router.post('/writeReview/:id', isLoggedIn, function(req, res, next) {
 });
 
 router.get('/sell', isLoggedIn, function(req, res, next) {
-    res.render('shop/sell', {});
+    if(req.user.stripeUserId){
+        return res.render('shop/sell', {});
+    }
+
+    req.flash("error_message", "Please connect your account with Stripe in order to start selling!");
+    return res.redirect('/user/profile');
 });
 
 router.post('/sell', isLoggedIn, upload.single('imageUpload'), function(req, res, next) {

@@ -62,9 +62,28 @@
             {{/if}}
         </div>
     </div>
+    <div class="row">
+        <div class="col-xs-12 col-md-6">
+            <h3>Stripe Connect</h3>
+                {{# if user.stripeUserId}}
+                    <div class="well">
+                        <label>Connected to Stripe!</label>
+                        <p>You can now start selling your products!<br>Payment will be made directly to your Stripe account.</p>
+                        <div>
+                            <a href="/sell" class="btn btn-success">Sell a product</a>
+                            <a href="/stripe/disconnect" class="btn btn-danger">Disconnect</a>
+                        </div>
+                    </div>
+                {{else}}
+                    <div class="well">
+                        <label>Connect to Stripe to start selling!</label>
+                        <p>We use Stripe Payment Gateway to handle your transactions.</p>
+                        <p><a href="/stripe/connect" class="btn btn-success">Connect to Stripe</a></p>
+                    </div>
+                {{/if}}
+        </div>
+    </div>
 </div>
-
-
 
 <script>
   $("#editAddress").click(function(e){

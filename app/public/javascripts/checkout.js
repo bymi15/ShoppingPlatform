@@ -3,6 +3,12 @@ Stripe.setPublishableKey('pk_test_NNHBzQoHipzTyaqfQuT5Pkso');
 var $form = $('#checkout-form');
 
 $form.submit(function (event) {
+    $("#loader-wrapper").removeClass('hidden');
+
+    if($("#radioUseExisting").is(':checked')){
+        return $form.get(0).submit();
+    }
+
     $('#charge-error').addClass('hidden');
     $form.find('button').prop('disabled', true);
     Stripe.card.createToken({
@@ -16,6 +22,7 @@ $form.submit(function (event) {
             // Show the errors on the form
             $('#charge-error').text(response.error.message);
             $('#charge-error').removeClass('hidden');
+            $("#loader-wrapper").addClass('hidden');
             $form.find('button').prop('disabled', false); // Re-enable submission
 
         } else { // Token was created!

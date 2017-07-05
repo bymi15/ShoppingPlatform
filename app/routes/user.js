@@ -62,7 +62,7 @@ router.get('/productsForSale', isLoggedIn, function(req, res, next) {
 });
 
 router.get('/orders', isLoggedIn, function(req, res, next) {
-    Order.find({user: req.user}, function(err, orders){
+    Order.find({user: req.user}).sort({ createdAt: -1, _id: -1}).exec(function(err, orders){
         if(err){
             req.flash("error_message", "An error has occured! Please try again.");
             return res.redirect('back');
