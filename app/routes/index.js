@@ -20,14 +20,11 @@ const uuidV4 = require('uuid/v4');
 var multer = require('multer');
 var upload = multer({ dest: 'public/images/uploads/' });
 
+var env = process.env.NODE_ENV || 'development';
+var config = require('../config')[env];
 
-var CLIENT_ID = 'ca_AxQsVkEHOuVczyLUN0Ds8ODiarYMFhnR';
-var CLIENT_SECRET = 'sk_test_9zHUItnUCbHQWtbcejrNLnT1';
-
-if(process.env.NODE_ENV == 'production'){
-    CLIENT_ID = 'ca_AxQsKmiySsA1vXM7gav41MeRSAGjHIZw';
-    CLIENT_SECRET = 'sk_live_X7CV6KZFuoEBvv26o3eUkRSR';
-}
+var CLIENT_ID = config.stripe_client_id;
+var CLIENT_SECRET = config.stripe_client_secret;
 
 router.get('/addToCart/:id', function(req, res, next) {
     var productId = req.params.id;
