@@ -2,9 +2,15 @@
     <div class="container-grey">
         <div class="row">
             <div class="col-sm-6 col-md-4">
-                <div class="thumbnail">
-                    <img src="{{ product.imagePath }}" class="img-responsive">
+                <div class="sp-loading"><img src="/images/assets/simple_preloader.gif" alt=""></div>
+                <div class="sp-wrap">
+                    {{# each product.photos}}
+                    <a href="{{ this }}"><img src="{{ this }}"></a>
+                    {{/each}}
                 </div>
+                <!-- <div class="thumbnail">
+                    <img src="{{ product.imagePath }}" class="img-responsive">
+                </div> -->
             </div>
             <div class="col-sm-6 col-md-8">
                 {{# if hasLowStock }}
@@ -36,12 +42,12 @@
     <div class="container-grey" style="padding-left: 30px; padding-right: 30px;">
         <div class="row">
             <div class="col-sm-12">
-                <h2>Product Reviews</h2>
+                <h2>Product Reviews &nbsp<a href="/writeReview/{{product._id}}" class="btn btn-primary" role="button"><i class="fa fa-pencil"></i> Write a review</a></h2>
                 <hr>
                 <h4 style="font-weight:bold;">Average Rating </h4>
                 <h4 class="rating-description">{{numRating}} reviews</h4>
                 <div id="averageRating">{{averageRating}}</div>
-                <p class="rating-description">{{averageRating}} out of 5 stars</p>
+                <p class="rating-description">{{averageRating}} out of 5.0 stars</p>
                 <hr>
                 <h4 style="font-weight:bold;">All reviews</h4>
                 {{# if reviews }}
@@ -71,16 +77,22 @@
                     {{/each}}
                     </section>
                 {{else}}
-                    <h5>This product has no reviews.</h5>
-                    <a href="/writeReview/{{product._id}}" class="btn btn-primary" role="button"><i class="fa fa-pencil"></i> Write a review</a>
+                    <h4>This product has no reviews.</h4>
                 {{/if}}
             </div>
         </div>
     </div>
 </div>
 
-<script>
+<script type="text/javascript" src="/javascripts/smoothproducts.min.js"></script>
 
+<script>
+/*product image gallery*/
+$(window).on('load', function(){
+    $('.sp-wrap').smoothproducts();
+});
+
+/*rating stars*/
 $(".rating-stars").each(function(i, div) {
     var rating = parseInt($(this).text());
     var readOnly = $(this).rateYo({

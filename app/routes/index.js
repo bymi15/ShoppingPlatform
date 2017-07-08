@@ -528,7 +528,7 @@ router.get('/sell', isLoggedIn, function(req, res, next) {
     return res.redirect('/user/profile');
 });
 
-router.post('/sell', isLoggedIn, upload.single('imageUpload'), function(req, res, next) {
+router.post('/sell', isLoggedIn, upload.array('imageUpload'), function(req, res, next) {
     var product = new Product();
     product.title = req.body.title;
     product.description = req.body.description;
@@ -536,38 +536,53 @@ router.post('/sell', isLoggedIn, upload.single('imageUpload'), function(req, res
     product.price = req.body.price;
     product.seller = req.user;
     product.stock = req.body.stock;
-
     var allowedExtensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif'];
-    var ext = path.extname(req.file.originalname).toLowerCase();
 
-    var tempPath = req.file.path;
-    var newFileName = uuidV4() + ext;
-    var targetPath = path.resolve('./public/images/uploads/' + newFileName);
+    var thumbnailIndex = parseInt(req.body.thumbnailIndex);
 
-    product.imagePath = '/images/uploads/' + newFileName;
+    async.forEachOf(req.files, function(file, key, callback){
+        var ext = path.extname(file.originalname).toLowerCase();
 
-    if (allowedExtensions.indexOf(ext) > -1) {
-        fs.rename(tempPath, targetPath, function(err) {
+        var tempPath = file.path;
+        var newFileName = uuidV4() + ext;
+        var targetPath = path.resolve('./public/images/uploads/' + newFileName);
+
+        if(key === thumbnailIndex){
+            product.imagePath = '/images/uploads/' + newFileName;
+        }
+
+        product.photos[key] = ('/images/uploads/' + newFileName);
+
+        if (allowedExtensions.indexOf(ext) > -1) {
+            fs.rename(tempPath, targetPath, function(err) {
+                if(err){
+                    return callback("An error has occured! Please try again.");
+                }
+                callback();
+            });
+        } else {
+            fs.unlink(tempPath, function () {
+                return callback("An error has occured! Please make sure you selected a valid image.");
+            });
+        }
+
+    }, function(err){
+        //all async tasks completed
+        if(err){
+            req.flash("error_message", err);
+            return res.redirect('back');
+        }
+        product.markModified('photos');
+        product.save(function(err, result){
             if(err){
                 req.flash("error_message", "An error has occured! Please try again.");
                 return res.redirect('/sell');
             }
+            req.flash("success_message", "Successfully added product for sale!");
+            res.redirect('/product/' + result.id);
+        });
 
-            product.save(function(err, result){
-                if(err){
-                    req.flash("error_message", "An error has occured! Please try again.");
-                    return res.redirect('/sell');
-                }
-                req.flash("success_message", "Successfully added product for sale!");
-                res.redirect('/shop');
-            });
-        });
-    } else {
-        fs.unlink(tempPath, function () {
-            req.flash("error_message", "An error has occured! Please make sure you selected a valid image.");
-            return res.redirect('back');
-        });
-    }
+    });
 });
 
 
@@ -687,7 +702,7 @@ router.get('/removeProduct/:id', isLoggedIn, function(req, res, next) {
             return res.redirect('back');
         }
 
-        var imagePath = path.resolve('./public' + product.imagePath);
+        var imagePaths = product.photos;
 
         product.remove(function(err, removed){
             if(err || !removed){
@@ -695,8 +710,13 @@ router.get('/removeProduct/:id', isLoggedIn, function(req, res, next) {
                 return res.redirect('back');
             }
 
-            //remove thumbnail image
-            fs.unlink(imagePath, function () {
+            async.forEachOf(imagePaths, function(imagePath, key, callback){
+                var absPath = path.resolve('./public' + imagePath);
+                fs.unlink(absPath, function () {
+                    return callback();
+                });
+            }, function(err){
+                //all async tasks completed
                 req.flash("success_message", "Successfully removed product!");
                 res.redirect('back');
             });

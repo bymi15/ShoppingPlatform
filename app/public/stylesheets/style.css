@@ -17,6 +17,13 @@ body{
     margin-bottom: 25px;
 }
 
+.thumb {
+    height: 75px;
+    border: 1px solid #CCCCCC;
+    margin: 10px 5px 0 0;
+    cursor: pointer;
+}
+
 /*REVIEWS*/
 /*Comment List styles*/
 .review-list .row {

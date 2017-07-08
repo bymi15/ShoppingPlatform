@@ -3,9 +3,10 @@ var mongoosePaginate = require('mongoose-paginate');
 var Schema = mongoose.Schema;
 
 var schema = new Schema({
-    imagePath: {type:String, required:true},
     title: {type:String, required:true},
     description: {type:String, required:false},
+    imagePath: {type:String, required:true},
+    photos: {type:[String], required:false},
     seller: {type: Schema.Types.ObjectId, ref: 'User'},
     category: {type: Schema.Types.ObjectId, ref: 'Category'},
     attributes: {type: Schema.Types.Mixed, required:false},

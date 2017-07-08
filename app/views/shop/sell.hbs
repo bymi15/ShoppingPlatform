@@ -16,27 +16,27 @@
                     </select>
                 </div>
                 <div class="col-md-12 form-group">
+                    <label for="imagePath">Photos (max 5)</label>
+                    <div class="input-group">
+                        <input type="file" id="imageUpload" name="imageUpload" class="inputFile" accept="image/png, image/jpeg, image/gif, image/jpg" multiple required>
+                        <label class="btn btn-primary" for="imageUpload"><span class="fa fa-upload"></span> Upload</label>
+                    </div>
+                    <input type="hidden" id="thumbnailIndex" name="thumbnailIndex" value="0">
+                    <div id="list"></div>
+                </div>
+                <div class="col-md-12 form-group">
                     <label for="description">Description</label>
                     <textarea id="description" name="description" class="form-control"></textarea>
                 </div>
                 <div class="col-md-6 form-group">
                     <label for="price">Price ($)</label>
-                    <input type="number" id="price" name="price" class="form-control" required>
+                    <input type="number" id="price" name="price" class="form-control" min='0' required>
                 </div>
                 <div class="col-md-6 form-group">
                     <label for="stock">Stock</label>
-                    <input type="number" id="stock" name="stock" class="form-control" required>
+                    <input type="number" id="stock" name="stock" class="form-control" min='1' required>
                 </div>
-                <div class="col-md-12 form-group">
-                    <label for="imagePath">Image Thumbnail</label>
-                    <div class="input-group">
-                        <input type="text" id="imageName" name="imageName" class="form-control" readonly>
-                        <input type="file" id="imageUpload" name="imageUpload" class="inputFile" accept="image/*" required>
-                        <span class="input-group-btn">
-                            <label class="btn btn-primary" for="imageUpload">Select an Image</label>
-                        </span>
-                    </div>
-                </div>
+
                 <!-- <div id="attributesArea" class="form-group">
                     <label class="col-md-12">Attributes</label>
                     <div class="col-md-4">
