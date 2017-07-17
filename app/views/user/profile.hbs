@@ -71,7 +71,7 @@
                         <p>You can now start selling your products!<br>Payment will be made directly to your Stripe account.</p>
                         <div>
                             <a href="/sell" class="btn btn-success">Sell a product</a>
-                            <a href="/stripe/disconnect" class="btn btn-danger">Disconnect</a>
+                            <a href="/stripe/disconnect" id="disconnectStripe" class="btn btn-danger">Disconnect</a>
                         </div>
                     </div>
                 {{else}}
@@ -94,5 +94,14 @@
   $("#cancelEdit").click(function(e){
     $("#editAddressDisplay").addClass('hidden');
     $("#shippingAddressDisplay").removeClass('hidden');
+  });
+
+  $("#disconnectStripe").click(function(e) {
+    e.preventDefault();
+    var targetUrl = $(this).attr("href");
+
+    if (confirm("Are you sure you wish to disconnect from Stripe?")) {
+        window.location.href = targetUrl;
+    }
   });
 </script>

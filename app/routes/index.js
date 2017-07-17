@@ -386,6 +386,7 @@ router.post('/checkout', isLoggedIn, function(req, res, next) {
                     customer: req.user.stripeCustomerId,
                     destination: seller.stripeUserId,
                     transfer_group: seller.id,
+                    //application_fee: 100,
                 }).then(function(charge) {
                     if(err){
                         req.flash("error_message", err.message);
@@ -421,10 +422,17 @@ router.post('/checkout', isLoggedIn, function(req, res, next) {
                         return res.redirect('/checkout');
                     }
 
+                    var sellers = [];
+                    var arr = cart.groupBySeller();
+                    for(var i = 0; i < arr.length; i++){
+                        sellers.push(arr[i][0].item.seller);
+                    }
+
                     //add the order to the database
                     var order = new Order({
                         user: req.user,
                         cart: cart,
+                        sellers: sellers,
                         shippingAddress: shipping
                     });
 

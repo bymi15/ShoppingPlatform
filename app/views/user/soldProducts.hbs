@@ -1,0 +1,33 @@
+<div class="container">
+    <div class="row">
+        <h1>Sold Products <span style='font-size:18px; font-weight:400;'>({{numOrders}})</span></h1>
+        <hr>
+        {{# if orders }}
+            {{# each orders }}
+            <div class="well">
+                <h3>Order by <a style="text-decoration: none;" href="mailto:{{this.user.email}}">{{this.user.fullName}}</a></h3>
+                <p>{{this.datetime}}</p>
+
+                <h4 style="font-weight:600;">Products</h4>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {{# each this.items }}
+                        <div style="margin-bottom:10px;"><span class="label label-primary">{{ this.quantity }}</span> <a style="text-decoration: none;" href="/product/{{this.item._id}}">{{ this.item.title }}</a></div>
+                        {{/each}}
+                    </div>
+                    <div class="panel-footer">
+                        Total: <strong>${{ this.cart.totalPrice }}</strong>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="font-weight:600;">Shipping address</h4>
+                    <p>{{this.shippingAddress.address1}}<br>{{this.shippingAddress.address2}}<br>{{this.shippingAddress.city}}<br>{{this.shippingAddress.postalCode}}</p>
+                </div>
+            </div>
+            <hr>
+            {{/each}}
+        {{else}}
+            <h4>You have no sold products</h4>
+        {{/if}}
+    </div>
+</div>

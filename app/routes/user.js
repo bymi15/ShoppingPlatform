@@ -77,15 +77,55 @@ router.get('/orders', isLoggedIn, function(req, res, next) {
         orders.forEach(function(order){
             cart = new Cart(order.cart);
             order.items = cart.generateArray();
-            //var date = new Date(order.createdAt);
-            order.datetime = order.createdAt;//date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+            var date = new Date(order.createdAt);
+            order.datetime = date.toLocaleTimeString("en-US", {year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+            }); //order.createdAt;
+
             itemsProcessed++;
+
             if(itemsProcessed === orders.length){
                 return res.render('user/orders', {orders: orders});
             }
         });
     });
 });
+
+router.get('/soldProducts', isLoggedIn, function(req, res, next) {
+    Order.find({sellers: req.user}).populate(['user', 'shippingAddress']).sort({ createdAt: -1, _id: -1}).exec(function(err, orders){
+        if(err){
+            req.flash("error_message", "An error has occured! Please try again.");
+            return res.redirect('back');
+        }
+
+        if(orders.length === 0){
+            return res.render('user/soldProducts', {orders: null});
+        }
+
+        var cart;
+        var itemsProcessed = 0;
+        orders.forEach(function(order){
+            cart = new Cart(order.cart);
+            var arr = cart.groupBySeller();
+            for(var i = 0; i < arr.length; i++){
+                if(req.user.equals(arr[i][0].item.seller)){
+                    order.items = arr[i];
+                    break;
+                }
+            }
+
+            var date = new Date(order.createdAt);
+            order.datetime = date.toLocaleTimeString("en-US", {year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"
+            }); //order.createdAt;
+
+            itemsProcessed++;
+            if(itemsProcessed === orders.length){
+                return res.render('user/soldProducts', {orders: orders, numOrders: orders.length});
+            }
+        });
+    });
+});
+
 module.exports = router;
 
 function handleLoginSuccess(req, res, next){
