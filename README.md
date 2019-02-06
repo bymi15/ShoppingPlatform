@@ -2,4 +2,4 @@
 
 **(Currently still under development)**
 
-#### **Demo:** [shoppingplatform.herokuapp.com](shoppingplatform.herokuapp.com)
+#### **Demo:** [http://shoppingplatform.herokuapp.com](http://shoppingplatform.herokuapp.com)
