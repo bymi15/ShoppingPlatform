@@ -1,5 +1,5 @@
 # ShoppingPlatform
 
-**(Currently still under development)**
+**(Currently under development)**
 
 #### **Demo:** [http://shoppingplatform.herokuapp.com](http://shoppingplatform.herokuapp.com)
